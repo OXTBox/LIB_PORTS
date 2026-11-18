@@ -1,0 +1,12 @@
+# LIB_PORTS registry: every TCP port our programs listen on. One row per port; the port is the key.
+# Columns (tab-separated): port	name	listener	started_by	token_file	clients	notes
+# Lines starting with # are comments. tools/ports_check.py reads this file; so does livecode/lib_ports.livecodescript.
+1234	lmstudio	LM Studio (its local server)	LM Studio app (not ours)	-	LIB_MCP/assets/headless_lmStudio.bat; LIB_EDITOR spark tools	not ours: its default port
+8188	comfyui	ComfyUI (Comfy Desktop)	Comfy Desktop (not ours)	-	LIB_COMFY/tools/queue.sh	not ours: its default port
+8765	kit-devserver	LiveCode_Claude_Kit dev server (old)	Vibecode3D/LiveCode_Claude_Kit/kit/scripts/cards/LIB_DEVSERVER.livecodescript	-	Vibecode3D/LiveCode_Claude_Kit/kit/tools/lc.sh	older kit, before LIB_MCP; kept reserved
+8766	mcp-ide	LIB_MCP DevServer in the IDE (OXT/LiveCode)	LIB_MCP/livecode/lib_mcp.livecodescript (DevServer.Start default); the xt3d testbench and vibe engine in the IDE	C:/LIB_MCP/devtoken_8766.txt	LIB_MCP/python/lib_mcp (Client 8766); xt3D bridge mcp/xt3d_tools.py	one per IDE: whichever stack starts it last owns it
+8767	mcp-standalone	LIB_MCP's own test standalone	LIB_MCP/standalone/launcher.livecodescript	C:/LIB_MCP/devtoken_8767.txt	LIB_MCP cli --standalone; LIB_GAMES/tools/engine_play.sh, headless_play.sh	started by clients when needed
+8768	xt3d-bench	xt3d games bench (plain)	xt3D_Raylib_Livecode_Bridge/standalone/launcher.livecodescript	C:/LIB_MCP/devtoken_8768.txt	-
+8769	vibe-standalone	VibeCode3D.exe build	xt3D_Raylib_Livecode_Bridge/testbench/vibe_engine_xt3d.livecodescript (standalone branch)	C:/LIB_MCP/devtoken_8769.txt	LIB_USERS, LIB_SYSTEM notes	so Claude can drive the game itself
+8770	xt3d-bench-mcp	xt3d games bench with LIB_MCP	xt3D_Raylib_Livecode_Bridge/standalone/launcher_lib_mcp.livecodescript	C:/LIB_MCP/devtoken_8770.txt	LIB_DEV/livecode/game_browser.livecodescript (GB.Bench)	18 Nov: two copies listened at once; see RULES.md rule 2
+# 8771-8799: free, for our next servers. Take the lowest free one and add its row here first.
