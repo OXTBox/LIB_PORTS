@@ -8,8 +8,8 @@ browser's 15-second `curl` checks went to whichever copy Windows picked.
    before the code that opens it is committed. A new server takes the lowest free port in 8771-8799.
    `tools/ports_check.py scan` flags any port number in our code that has no row.
 
-2. **Look before you listen.** Before `accept connections on port`, a server checks whether something already
-   answers on the port (`Ports.InUse`, 500 ms). If something does, it does not start. It says which port and
+2. **Look before you listen.** Before `accept connections on port`, a server asks Windows whether a process
+   already listens on the port (`Ports.MayListen`; netstat). If one does, it does not start. It says which port and
    which registry name instead, and it leaves the token file alone. A token file belongs to the live listener.
 
 3. **Clients never hang the interface.** A health check (`/ping`) waits at most 2 seconds. A real request

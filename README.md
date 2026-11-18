@@ -28,7 +28,16 @@ Started 18 Nov 2026, after two xt3d games benches both listened on 8770 and froz
 - The Game Browser talks to the bench over its own socket (`GB.Http`) and starts programs with
   `open process`. No `shell`, so no frozen window (LIB_DEV branch `game-browser-no-freeze`).
 
-## Not built yet
+## The window: Ports.oxtstack
 
-- The settings window (a stack): the registry as a table, live status per port, the duplicate's process
-  with a Close button, the next free port.
+Open `Ports.oxtstack` in OXT-Beyond. It shows every port in the registry: who listens now (process ids),
+whether it answers, and what needs attention ("TWO COPIES", "listening, NOT ANSWERING"). Click a row to see
+its registry entry. **Close older copy** (enabled on a port with two listeners) asks Windows when each copy
+started and, after you say yes, ends the older one. **Edit registry** opens `ports.tsv` in Notepad. The
+status line gives the next free port for a new server.
+
+Its stack script is `livecode/ports_window.livecodescript`. Edit that file, then in the Message Box:
+
+    get textDecode(url ("binfile:<LIB_PORTS>/livecode/ports_window.livecodescript"), "UTF-8")
+    delete line 1 of it
+    set the script of stack "Ports" to it

@@ -6,7 +6,9 @@ script "LibPorts"
 ##   Ports.Name(8770)                -> xt3d-bench-mcp
 ##   Ports.Row(8770)                 -> array: port name listener started_by token_file clients notes
 ##   Ports.Listeners(8770)           -> the process ids listening on it, one per line (Windows' netstat)
+##   Ports.AllListeners()            -> [port] = process ids, for every listening port (one netstat)
 ##   Ports.InUse(8770)               -> true when any process listens on it
+##   Ports.NextFree()                -> the lowest free port in 8771-8799 for a new server
 ##   Ports.Answers(8770, 500)        -> true when a connection opens within 500 ms. A listener that does
 ##                                      not answer is stuck (18 Nov: the plain bench on 8768 listened
 ##                                      and accepted nothing); a timeout never means "free"
@@ -82,27 +84,49 @@ end Ports.List
 
 -------------------------------------------------------------------- is anyone there?
 
+-- every listening TCP port on this PC: [port] = its process ids, one per line. One netstat call.
+function Ports.AllListeners
+   local tOut, tLine, tAddr, tPort, tAll
+   set the cursor to busy
+   if the platform is not "Win32" then return empty
+   set the hideConsoleWindows to true
+   put shell("netstat -ano -p tcp") into tOut
+   repeat for each line tLine in tOut
+      set the cursor to busy
+      if word 4 of tLine is not "LISTENING" then next repeat
+      put word 2 of tLine into tAddr
+      set the itemDelimiter to ":"
+      put item -1 of tAddr into tPort
+      if word 5 of tLine is among the lines of tAll[tPort] then next repeat
+      if tAll[tPort] is not empty then put return after tAll[tPort]
+      put word 5 of tLine after tAll[tPort]
+   end repeat
+   return tAll
+end Ports.AllListeners
+
 -- the process ids listening on pPort, one per line (two lines: two copies, the 18 Nov trouble)
 function Ports.Listeners pPort
-   local tOut, tLine, tPids, tAddr
-   set the cursor to busy
-   if the platform is "Win32" then
-      set the hideConsoleWindows to true
-      put shell("netstat -ano -p tcp") into tOut
-      repeat for each line tLine in tOut
-         set the cursor to busy
-         if word 4 of tLine is not "LISTENING" then next repeat
-         put word 2 of tLine into tAddr
-         set the itemDelimiter to ":"
-         if item -1 of tAddr is not pPort then next repeat
-         if word 5 of tLine is not among the lines of tPids then put word 5 of tLine & return after tPids
-      end repeat
-   else
-      put shell("lsof -nP -t -iTCP:" & pPort & " -sTCP:LISTEN 2>/dev/null") into tPids
+   local tAll
+   if the platform is not "Win32" then
+      set the cursor to busy
+      return line 1 to -1 of shell("lsof -nP -t -iTCP:" & pPort & " -sTCP:LISTEN 2>/dev/null")
    end if
-   if the last char of tPids is return then delete the last char of tPids
-   return tPids
+   put Ports.AllListeners() into tAll
+   return tAll[pPort]
 end Ports.Listeners
+
+-- the lowest port in 8771-8799 with no registry row and nothing listening on it
+function Ports.NextFree pAll
+   local tPort
+   if sRows is not an array then Ports.Load
+   repeat with tPort = 8771 to 8799
+      set the cursor to busy
+      if tPort is among the lines of the keys of sRows then next repeat
+      if pAll[tPort] is not empty then next repeat
+      return tPort
+   end repeat
+   return empty
+end Ports.NextFree
 
 function Ports.InUse pPort
    return Ports.Listeners(pPort) is not empty
