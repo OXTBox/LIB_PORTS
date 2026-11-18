@@ -13,8 +13,13 @@ browser's 15-second `curl` checks went to whichever copy Windows picked.
    which registry name instead, and it leaves the token file alone. A token file belongs to the live listener.
 
 3. **Clients never hang the interface.** A health check (`/ping`) waits at most 2 seconds. A real request
-   waits at most 15. Whatever blocks (`shell`, a blocking `open socket`, a long `read`) sets
-   `the cursor to busy` first, and the window says what it is waiting for.
+   waits at most 15. Talk HTTP over a socket of your own with `wait ... with messages` (LIB_DEV's
+   `GB.Http`), never `shell("curl ...")`: on 18 Nov every `shell()` took 20-50 seconds just to start a
+   program (antivirus), with the window frozen. Start programs with `open process ... for neither`
+   (15 ms), not `shell("start ...")`. Whatever must block sets `the cursor to busy` first, and the
+   window says what it is waiting for.
+   A socket that timed out while connecting is left open and closed when it opens or fails: closing it
+   early lets its late error land on the next socket (error 10038).
 
 4. **Busy cursor (LiveCode HIG).** Every file access, every `shell()` and every `repeat` / `while` loop sets
    `the cursor to busy`. Inside a loop it goes inside the body, so the beach ball turns each time round.

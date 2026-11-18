@@ -126,18 +126,34 @@ function Ports.Answers pPort, pMs
       wait 20 milliseconds with messages
    end repeat
    put sProbe[tSock] into tState
+   if tState is empty then
+      -- still connecting: closing it now lets its late error land on the next socket (18 Nov,
+      -- error 10038). It is closed when it opens or fails.
+      put "abandoned" into sProbe[tSock]
+      return false
+   end if
    delete variable sProbe[tSock]
-   close socket tSock     -- open, failed or still trying: done with it either way
+   close socket tSock
    return tState is "open"
 end Ports.Answers
 
 on Ports.OnProbeOpen pSocket
-   if pSocket is among the lines of the keys of sProbe then put "open" into sProbe[pSocket]
+   if pSocket is not among the lines of the keys of sProbe then exit Ports.OnProbeOpen
+   if sProbe[pSocket] is "abandoned" then
+      delete variable sProbe[pSocket]
+      close socket pSocket
+   else
+      put "open" into sProbe[pSocket]
+   end if
 end Ports.OnProbeOpen
 
 on socketError pSocket, pErr
    if pSocket is among the lines of the keys of sProbe then
-      put "error" into sProbe[pSocket]
+      if sProbe[pSocket] is "abandoned" then
+         delete variable sProbe[pSocket]
+      else
+         put "error" into sProbe[pSocket]
+      end if
    else
       pass socketError
    end if
