@@ -41,3 +41,9 @@ Its stack script is `livecode/ports_window.livecodescript`. Edit that file, then
     get textDecode(url ("binfile:<LIB_PORTS>/livecode/ports_window.livecodescript"), "UTF-8")
     delete line 1 of it
     set the script of stack "Ports" to it
+
+## Licence
+
+GPL-3.0 (see `LICENSE`), because the xTalk work here is built on the GPL-licensed LiveCode Community 9 engine. Copyright (c) 2026 xAction.
+
+The Python files (`.py`) and other material that is not xTalk are also offered under the MIT licence, Copyright (c) 2026 xAction: you may use them under either licence.
